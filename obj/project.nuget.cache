@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "T56p+Fmgpkg=",
+  "success": true,
+  "projectFilePath": "/Users/victorpetrica/Desktop/Projects/Sharpy/Sharpy.csproj",
+  "expectedPackageFiles": [
+    "/Users/victorpetrica/.nuget/packages/ppy.sdl2-cs/1.0.741-alpha/ppy.sdl2-cs.1.0.741-alpha.nupkg.sha512"
+  ],
+  "logs": []
+}
