@@ -7,8 +7,8 @@ public class Asset
     public IntPtr Texture { get; }
     public int Height { get; }
     public int Width { get; }
-    public int PositionX { get; private set; }
-    public int PositionY { get; private set; }
+    public int PositionX { get; protected set; }
+    public int PositionY { get; protected set; }
 
     public Asset(IntPtr texture, int height, int width, int positionX, int positionY)
     {
@@ -19,8 +19,14 @@ public class Asset
         PositionY = positionY;
     }
 
-
-    public void DisplayOnRenderer(IntPtr renderer, int x, int y)
+    public Asset(IntPtr texture, int height, int width)
+    {
+        Texture = texture;
+        Height = height;
+        Width = width;
+    }
+    //Display at a certain coordinate
+    public void DisplayOnRendererAt(IntPtr renderer, int x, int y)
     {
         PositionX = x;
         PositionY = y;
@@ -28,11 +34,14 @@ public class Asset
         SDL.SDL_Rect destRect = new SDL.SDL_Rect { x = x, y = y, w = Width, h = Height };
         //Display to the renderer on the rectangle
         SDL.SDL_RenderCopy(renderer, Texture, IntPtr.Zero, ref destRect);
-
-
-
     }
-
-
+    //Display at position defined in constructor
+    public void DisplayOnRenderer(IntPtr renderer)
+    {
+        //Create rectangle where to display
+        SDL.SDL_Rect destRect = new SDL.SDL_Rect { x = PositionX, y = PositionY, w = Width, h = Height };
+        //Display to the renderer on the rectangle
+        SDL.SDL_RenderCopy(renderer, Texture, IntPtr.Zero, ref destRect);
+    }
 
 }

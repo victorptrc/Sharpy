@@ -4,7 +4,7 @@ namespace Sharpy;
 class Program
 {
     static IntPtr screen = IntPtr.Zero;  // SDL_Window* equivalent in C#
-    static IntPtr renderer = IntPtr.Zero;
+    static IntPtr renderer = IntPtr.Zero; // Rendering context
 
     static void Main(string[] args)
     {
@@ -37,13 +37,13 @@ class Program
             return;
         }
         // Create a texture from the surface
-        IntPtr texture = SDL.SDL_CreateTextureFromSurface(renderer, imageSurface);
+        IntPtr appleTexture = SDL.SDL_CreateTextureFromSurface(renderer, imageSurface);
         // Free the surface as it's no longer needed
         SDL.SDL_FreeSurface(imageSurface);
         Background background = new Background(renderer);
+        background.Create();
+        Asset apple = new Apple(appleTexture, 40, 40, 14, 14);
 
-        // Call the display_bmp function to display an image
-        // display_bmp("./images/test.bmp");
 
         // Wait for user to close the window
         bool running = true;
@@ -60,20 +60,15 @@ class Program
 
             // Clear the screen
             SDL.SDL_RenderClear(renderer);
-            Asset apple = new Asset(texture, 40, 40, 100, 100);
-            Asset apple2 = new Asset(texture, 40, 40, 0, 0);
             background.Draw();
-            // Copy the texture to the renderer
-            // SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, ref destRect);
-            // SDL.SDL_RenderCopy(renderer, texture, IntPtr.Zero, ref secondRect);
-            apple.DisplayOnRenderer(renderer, 100, 100);
-            apple2.DisplayOnRenderer(renderer, 0, 0);
+            apple.DisplayOnRenderer(renderer);
             // Present the renderer
             SDL.SDL_RenderPresent(renderer);
         }
 
         // Clean up
-        SDL.SDL_DestroyTexture(texture);
+        background.DestroyTexture();
+        SDL.SDL_DestroyTexture(appleTexture);
         SDL.SDL_DestroyRenderer(renderer);
         SDL.SDL_DestroyWindow(screen);
         SDL.SDL_Quit();

@@ -28,3 +28,4 @@
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.pdb
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.genruntimeconfig.cache
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/ref/Sharpy.dll
+/Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.sourcelink.json

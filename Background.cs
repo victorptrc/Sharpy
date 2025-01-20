@@ -5,17 +5,25 @@ public class Background
 {
     public IntPtr Renderer;
     private int squareSize = 40;
+    private int screenWidth = 600;
+    private int screenHeight = 600;
+    public IntPtr BackgroundTexture;
 
     public Background(IntPtr renderer)
     {
         Renderer = renderer;
     }
-
     public void Draw()
     {
-        // 170, 215, 80 light green
-        // 162, 209, 72 darker green
-        SDL.SDL_RenderClear(Renderer); // Clear entire screen
+        SDL.SDL_RenderCopy(Renderer, BackgroundTexture, IntPtr.Zero, IntPtr.Zero);
+    }
+    public void Create()
+    {
+        //Create background texture
+        BackgroundTexture = SDL.SDL_CreateTexture(Renderer, SDL.SDL_PIXELFORMAT_RGBA8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
+        //Set the target for drawing
+        SDL.SDL_SetRenderTarget(Renderer, BackgroundTexture);
+
         for (int i = 0; i < 15; i++)
         {
             for (int j = 0; j < 15; j++)
@@ -50,9 +58,16 @@ public class Background
                         SDL.SDL_RenderFillRect(Renderer, ref square);
                     }
                 }
-
-
             }
         }
+        // Reset the render target back to the default (the screen)
+        SDL.SDL_SetRenderTarget(Renderer, IntPtr.Zero);
+        // Render the background texture to the screen
+        SDL.SDL_RenderCopy(Renderer, BackgroundTexture, IntPtr.Zero, IntPtr.Zero);
+    }
+
+    public void DestroyTexture()
+    {
+        SDL.SDL_DestroyTexture(BackgroundTexture);
     }
 }
