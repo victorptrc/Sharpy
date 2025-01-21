@@ -4,29 +4,29 @@ using SDL2;
 namespace Sharpy;
 public class Asset
 {
-    public IntPtr Texture { get; }
-    public int Height { get; }
-    public int Width { get; }
-    public int PositionX { get; protected set; }
-    public int PositionY { get; protected set; }
+    public IntPtr Texture { get; set; }
+    public int Height { get; set; }
+    public int Width { get; set; }
+    public int PositionX { get; set; }
+    public int PositionY { get; set; }
 
     public Asset(IntPtr texture, int height, int width, int positionX, int positionY)
     {
         Texture = texture;
         Height = height;
         Width = width;
-        PositionX = positionX;
-        PositionY = positionY;
+        PositionX = positionX * 40;
+        PositionY = positionY * 40;
     }
-
-    public Asset(IntPtr texture, int height, int width)
+    public Asset(IntPtr texture, int positionX, int positionY)
     {
         Texture = texture;
-        Height = height;
-        Width = width;
+        PositionX = positionX * 40;
+        PositionY = positionY * 40;
     }
+
     //Display at a certain coordinate
-    public void DisplayOnRendererAt(IntPtr renderer, int x, int y)
+    public virtual void DisplayOnRendererAt(IntPtr renderer, int x, int y)
     {
         PositionX = x;
         PositionY = y;
@@ -36,7 +36,7 @@ public class Asset
         SDL.SDL_RenderCopy(renderer, Texture, IntPtr.Zero, ref destRect);
     }
     //Display at position defined in constructor
-    public void DisplayOnRenderer(IntPtr renderer)
+    public virtual void DisplayOnRenderer(IntPtr renderer)
     {
         //Create rectangle where to display
         SDL.SDL_Rect destRect = new SDL.SDL_Rect { x = PositionX, y = PositionY, w = Width, h = Height };

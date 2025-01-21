@@ -22,10 +22,10 @@
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.AssemblyInfoInputs.cache
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.AssemblyInfo.cs
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.csproj.CoreCompileInputs.cache
+/Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.sourcelink.json
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.csproj.Up2Date
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.dll
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/refint/Sharpy.dll
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.pdb
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.genruntimeconfig.cache
 /Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/ref/Sharpy.dll
-/Users/victorpetrica/Desktop/Projects/Sharpy/obj/Debug/net8.0/Sharpy.sourcelink.json
