@@ -7,18 +7,28 @@ public class Game
     public IntPtr window = IntPtr.Zero;  // SDL_Window* equivalent in C#
     public IntPtr renderer = IntPtr.Zero; // Rendering context
     public bool Running;
-    public Background? background; //I dont know how to fix this yet so ill leave it like this
-    public static Dictionary<string, IntPtr> Textures = new Dictionary<string, IntPtr>();
-    public List<Asset> Assets = new List<Asset>();
+    public Snake snake;
+    public IntPtr font;
+    public Background background;
+    public static Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
+    FPSCounter fps;
+
+
+
 
     public void Play()
     {
-        Initialize();
-        Snake snake = new Snake(5, 5);
 
+        Initialize();
+        LoadMedia();
+
+        snake = new Snake(5 * 40, 5 * 40);
         Running = true;
+        uint lastMovementTime = SDL.SDL_GetTicks();
+        fps = new(renderer, font);
         while (Running)
         {
+            //Event Handler
             SDL.SDL_Event e;
             while (SDL.SDL_PollEvent(out e) != 0)
             {
@@ -26,23 +36,75 @@ public class Game
                 {
                     Running = false;
                 }
+                else if (e.type == SDL.SDL_EventType.SDL_KEYDOWN)
+                {
+                    HandleKeyPress(e);
+                }
             }
-            // Clear the screen
-            SDL.SDL_RenderClear(renderer);
-            background.Draw();
-            //Render all assets
-            snake.Render(renderer);
-            //snake.Move();
-            // RenderAssets();
-            // Present the renderer
-            SDL.SDL_RenderPresent(renderer);
+            fps.Update();
+            uint currentTime = SDL.SDL_GetTicks();
+            RenderObjects();
+            if (currentTime - lastMovementTime >= 135)
+            {
+                snake.PrintMovementQueue();
+                snake.Move();
+                lastMovementTime = currentTime;
+            }
 
         }
-        background.DestroyTexture();
-        SDL.SDL_DestroyRenderer(renderer);
-        SDL.SDL_DestroyWindow(window);
-        SDL.SDL_Quit();
+        Clean();
 
+    }
+    public void RenderObjects()
+    {
+        SDL.SDL_RenderClear(renderer);
+        background.Draw();
+        snake.Render(renderer);
+        fps.Display(500, 0);
+        SDL.SDL_RenderPresent(renderer);
+    }
+    public void LoadMedia()
+    {
+        //Load font
+        font = SDL_ttf.TTF_OpenFont("./fonts/MegamaxJonathanToo-YqOq2.ttf", 14);
+        if (font == IntPtr.Zero)
+        {
+            Console.WriteLine("Failed to load font: " + SDL_ttf.TTF_GetError());
+            return;
+        }
+
+        // Load textures for body parts
+        Textures["body_horizontal"] = new Texture(renderer, "./images/body_horizontal.png");
+        Textures["body_vertical"] = new Texture(renderer, "./images/body_vertical.png");
+        Textures["body_bottomleft"] = new Texture(renderer, "./images/body_bottomleft.png");
+        Textures["body_topleft"] = new Texture(renderer, "./images/body_topleft.png");
+        Textures["body_bottomright"] = new Texture(renderer, "./images/body_bottomright.png");
+        Textures["body_topright"] = new Texture(renderer, "./images/body_topright.png");
+
+        // Load textures for head parts
+        Textures["head_up"] = new Texture(renderer, "./images/head_up.png");
+        Textures["head_down"] = new Texture(renderer, "./images/head_down.png");
+        Textures["head_left"] = new Texture(renderer, "./images/head_left.png");
+        Textures["head_right"] = new Texture(renderer, "./images/head_right.png");
+
+        // Load textures for tail parts
+        Textures["tail_up"] = new Texture(renderer, "./images/tail_up.png");
+        Textures["tail_down"] = new Texture(renderer, "./images/tail_down.png");
+        Textures["tail_left"] = new Texture(renderer, "./images/tail_left.png");
+        Textures["tail_right"] = new Texture(renderer, "./images/tail_right.png");
+
+        // Load texture for apple
+        Textures["apple"] = new Texture(renderer, "./images/apple.png");
+
+        // Check for failed loads
+        foreach (var texture in Textures)
+        {
+            if (texture.Value.TexturePtr == IntPtr.Zero)
+            {
+                Console.WriteLine($"Failed to load texture: {texture.Key}");
+                return;
+            }
+        }
     }
     public void Initialize()
     {
@@ -51,6 +113,17 @@ public class Game
         {
             Console.WriteLine($"SDL could not initialize! SDL_Error: {SDL.SDL_GetError()}");
             return;
+        }
+        // Initialize fonts
+        if (SDL_ttf.TTF_Init() < 0)
+        {
+            Console.WriteLine($"Error initializing SDL_ttf: {SDL_ttf.TTF_GetError()}");
+            return;
+        }
+        // Initialize SDL_Image
+        if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) < 0)
+        {
+            Console.WriteLine($"SDL Image could not initialize! SDL_Error: {SDL.SDL_GetError()}");
         }
 
         //Create Window
@@ -68,104 +141,41 @@ public class Game
         //Create background
         background = new Background(renderer);
         background.Create();
-        //Load all textures
-        LoadTextures();
     }
-    public void LoadTextures()
+
+    public void HandleKeyPress(SDL.SDL_Event e)
     {
-        if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) < 0)
+        switch (e.key.keysym.sym)
         {
-            Console.WriteLine($"SDL Image could not initialize! SDL_Error: {SDL.SDL_GetError()}");
-        }
+            case SDL.SDL_Keycode.SDLK_UP:
+                if (snake.Head.currentDirection != SnakePiece.Direction.DOWN && snake.Head.currentDirection != SnakePiece.Direction.UP) { snake.MovementQueue.Add(SnakePiece.Direction.UP); }
+                break;
+            case SDL.SDL_Keycode.SDLK_DOWN:
+                if (snake.Head.currentDirection != SnakePiece.Direction.UP && snake.Head.currentDirection != SnakePiece.Direction.DOWN) { snake.MovementQueue.Add(SnakePiece.Direction.DOWN); }
+                break;
+            case SDL.SDL_Keycode.SDLK_LEFT:
+                if (snake.Head.currentDirection != SnakePiece.Direction.RIGHT && snake.Head.currentDirection != SnakePiece.Direction.LEFT) { snake.MovementQueue.Add(SnakePiece.Direction.LEFT); }
+                break;
+            case SDL.SDL_Keycode.SDLK_RIGHT:
+                if (snake.Head.currentDirection != SnakePiece.Direction.LEFT && snake.Head.currentDirection != SnakePiece.Direction.RIGHT) { snake.MovementQueue.Add(SnakePiece.Direction.RIGHT); }
+                break;
 
-        // Load surfaces for body parts
-        IntPtr imageSurfaceBodyHorizontal = SDL_image.IMG_Load("./images/body_horizontal.png");
-        IntPtr imageSurfaceBodyVertical = SDL_image.IMG_Load("./images/body_vertical.png");
-        IntPtr imageSurfaceBodyBottomLeft = SDL_image.IMG_Load("./images/body_bottomleft.png");
-        IntPtr imageSurfaceBodyTopLeft = SDL_image.IMG_Load("./images/body_topleft.png");
-        IntPtr imageSurfaceBodyBottomRight = SDL_image.IMG_Load("./images/body_bottomright.png");
-        IntPtr imageSurfaceBodyTopRight = SDL_image.IMG_Load("./images/body_topright.png");
-
-        // Load surfaces for head parts
-        IntPtr imageSurfaceHeadUp = SDL_image.IMG_Load("./images/head_up.png");
-        IntPtr imageSurfaceHeadDown = SDL_image.IMG_Load("./images/head_down.png");
-        IntPtr imageSurfaceHeadLeft = SDL_image.IMG_Load("./images/head_left.png");
-        IntPtr imageSurfaceHeadRight = SDL_image.IMG_Load("./images/head_right.png");
-
-        // Load surfaces for tail parts
-        IntPtr imageSurfaceTailUp = SDL_image.IMG_Load("./images/tail_up.png");
-        IntPtr imageSurfaceTailDown = SDL_image.IMG_Load("./images/tail_down.png");
-        IntPtr imageSurfaceTailLeft = SDL_image.IMG_Load("./images/tail_left.png");
-        IntPtr imageSurfaceTailRight = SDL_image.IMG_Load("./images/tail_right.png");
-
-        // Load surface for apple
-        IntPtr imageSurfaceApple = SDL_image.IMG_Load("./images/apple.png");
-
-        // Check for failed loads
-        if (imageSurfaceBodyHorizontal == IntPtr.Zero || imageSurfaceBodyVertical == IntPtr.Zero ||
-            imageSurfaceBodyBottomLeft == IntPtr.Zero || imageSurfaceBodyTopLeft == IntPtr.Zero ||
-            imageSurfaceBodyBottomRight == IntPtr.Zero || imageSurfaceBodyTopRight == IntPtr.Zero ||
-            imageSurfaceHeadUp == IntPtr.Zero || imageSurfaceHeadDown == IntPtr.Zero ||
-            imageSurfaceHeadLeft == IntPtr.Zero || imageSurfaceHeadRight == IntPtr.Zero ||
-            imageSurfaceTailUp == IntPtr.Zero || imageSurfaceTailDown == IntPtr.Zero ||
-            imageSurfaceTailLeft == IntPtr.Zero || imageSurfaceTailRight == IntPtr.Zero ||
-            imageSurfaceApple == IntPtr.Zero)
-        {
-            Console.WriteLine("Failed to load one or more textures: " + SDL_image.IMG_GetError());
-            return;
-        }
-
-        // Create textures from the surfaces and store them in the dictionary
-        Textures["body_horizontal"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceBodyHorizontal);
-        Textures["body_vertical"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceBodyVertical);
-        Textures["body_bottomleft"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceBodyBottomLeft);
-        Textures["body_topleft"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceBodyTopLeft);
-        Textures["body_bottomright"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceBodyBottomRight);
-        Textures["body_topright"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceBodyTopRight);
-
-        Textures["head_up"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceHeadUp);
-        Textures["head_down"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceHeadDown);
-        Textures["head_left"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceHeadLeft);
-        Textures["head_right"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceHeadRight);
-
-        Textures["tail_up"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceTailUp);
-        Textures["tail_down"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceTailDown);
-        Textures["tail_left"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceTailLeft);
-        Textures["tail_right"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceTailRight);
-
-        Textures["apple"] = SDL.SDL_CreateTextureFromSurface(renderer, imageSurfaceApple);
-
-        // Free the surfaces as they're no longer needed
-        SDL.SDL_FreeSurface(imageSurfaceBodyHorizontal);
-        SDL.SDL_FreeSurface(imageSurfaceBodyVertical);
-        SDL.SDL_FreeSurface(imageSurfaceBodyBottomLeft);
-        SDL.SDL_FreeSurface(imageSurfaceBodyTopLeft);
-        SDL.SDL_FreeSurface(imageSurfaceBodyBottomRight);
-        SDL.SDL_FreeSurface(imageSurfaceBodyTopRight);
-
-        SDL.SDL_FreeSurface(imageSurfaceHeadUp);
-        SDL.SDL_FreeSurface(imageSurfaceHeadDown);
-        SDL.SDL_FreeSurface(imageSurfaceHeadLeft);
-        SDL.SDL_FreeSurface(imageSurfaceHeadRight);
-
-        SDL.SDL_FreeSurface(imageSurfaceTailUp);
-        SDL.SDL_FreeSurface(imageSurfaceTailDown);
-        SDL.SDL_FreeSurface(imageSurfaceTailLeft);
-        SDL.SDL_FreeSurface(imageSurfaceTailRight);
-
-        SDL.SDL_FreeSurface(imageSurfaceApple);
-
-    }
-    public void AddAsset(Asset asset)
-    {
-        Assets.Add(asset);
-    }
-    public void RenderAssets()
-    {
-        foreach (var asset in Assets)
-        {
-            Console.WriteLine("Rendering asset at position: (" + asset.PositionX + ", " + asset.PositionY + ")");
-            asset.DisplayOnRenderer(renderer);
         }
     }
+
+    public void Clean()
+    {
+        foreach (var texture in Textures)
+        {
+            texture.Value.Destroy();
+        }
+        background.DestroyTexture();
+        SDL_ttf.TTF_CloseFont(font);
+        SDL.SDL_DestroyRenderer(renderer);
+        SDL.SDL_DestroyWindow(window);
+        SDL.SDL_Quit();
+    }
+
+
+
 }

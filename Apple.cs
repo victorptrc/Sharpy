@@ -1,13 +1,16 @@
 namespace Sharpy;
-public class Apple : Asset
+public class Apple : GameObject
 {
     public int SquareX;
     public int SquareY;
-    public Apple(nint texture, int height, int width, int squareX, int squareY) : base(texture, height, width)
+    public Apple(nint texture, int height, int width, int squareX, int squareY)
     {
         SquareX = squareX;
         SquareY = squareY;
-        PositionX = squareX * 40;
-        PositionY = squareY * 40;
+    }
+
+    public override void Update()
+    {
+
     }
 }
