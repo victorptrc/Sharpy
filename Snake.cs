@@ -77,6 +77,22 @@ public class Snake : GameObject
             MovementQueue.RemoveAt(0);
 
         }
+        if (Head.X >= 600)
+        {
+            Head.X = 0;
+        }
+        else if (Head.X < 0)
+        {
+            Head.X = 600;
+        }
+        else if (Head.Y >= 600)
+        {
+            Head.Y = 0;
+        }
+        else if (Head.Y < 0)
+        {
+            Head.Y = 600;
+        }
 
         for (int i = snakePieces.Count - 1; i > 0; i--)
         {
@@ -106,22 +122,7 @@ public class Snake : GameObject
         }
         snakePieces[0].ChangeTexture(snakePieces[0].currentDirection);
 
-        if (Head.X >= 600)
-        {
-            Head.X = 0;
-        }
-        else if (Head.X < 0)
-        {
-            Head.X = 600;
-        }
-        else if (Head.Y >= 600)
-        {
-            Head.Y = 0;
-        }
-        else if (Head.Y < 0)
-        {
-            Head.Y = 600;
-        }
+
     }
     public void Render(IntPtr renderer)
     {
@@ -140,10 +141,49 @@ public class Snake : GameObject
         }
         Console.WriteLine(sb.ToString());
     }
+    public void ProcessInput(SnakePiece.Direction direction)
+    {
+        SnakePiece.Direction lastQueueDirection;
+        if (MovementQueue.Count > 0)
+        {
+            lastQueueDirection = MovementQueue[MovementQueue.Count - 1];
+        }
+        else
+        {
+            lastQueueDirection = Head.currentDirection;
+        }
 
+        if (lastQueueDirection == direction || lastQueueDirection == GetOppositeDirection(direction))
+        {
+            return;
+        }
+        else
+        {
+            MovementQueue.Add(direction);
+        }
+    }
     public override void Update()
     {
         Move();
+    }
+
+
+    public SnakePiece.Direction GetOppositeDirection(SnakePiece.Direction direction)
+    {
+        switch (direction)
+        {
+            case SnakePiece.Direction.UP:
+                return SnakePiece.Direction.DOWN;
+            case SnakePiece.Direction.DOWN:
+                return SnakePiece.Direction.UP;
+            case SnakePiece.Direction.LEFT:
+                return SnakePiece.Direction.RIGHT;
+            case SnakePiece.Direction.RIGHT:
+                return SnakePiece.Direction.LEFT;
+            default:
+                throw new ArgumentException("Invalid direction");
+        }
+
     }
 }
 

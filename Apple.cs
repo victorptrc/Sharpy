@@ -3,10 +3,10 @@ public class Apple : GameObject
 {
     public int SquareX;
     public int SquareY;
-    public Apple(nint texture, int height, int width, int squareX, int squareY)
+
+    public Apple()
     {
-        SquareX = squareX;
-        SquareY = squareY;
+        Texture = Game.Textures["apple"];
     }
 
     public override void Update()

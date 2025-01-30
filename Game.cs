@@ -46,7 +46,9 @@ public class Game
             RenderObjects();
             if (currentTime - lastMovementTime >= 135)
             {
+                Console.WriteLine($"Time since last movement:{currentTime - lastMovementTime}");
                 snake.PrintMovementQueue();
+                Console.WriteLine($"Current Direction: {snake.Head.currentDirection}");
                 snake.Move();
                 lastMovementTime = currentTime;
             }
@@ -147,17 +149,21 @@ public class Game
     {
         switch (e.key.keysym.sym)
         {
+            case SDL.SDL_Keycode.SDLK_w:
             case SDL.SDL_Keycode.SDLK_UP:
-                if (snake.Head.currentDirection != SnakePiece.Direction.DOWN && snake.Head.currentDirection != SnakePiece.Direction.UP) { snake.MovementQueue.Add(SnakePiece.Direction.UP); }
+                snake.ProcessInput(SnakePiece.Direction.UP);
                 break;
+            case SDL.SDL_Keycode.SDLK_s:
             case SDL.SDL_Keycode.SDLK_DOWN:
-                if (snake.Head.currentDirection != SnakePiece.Direction.UP && snake.Head.currentDirection != SnakePiece.Direction.DOWN) { snake.MovementQueue.Add(SnakePiece.Direction.DOWN); }
+                snake.ProcessInput(SnakePiece.Direction.DOWN);
                 break;
+            case SDL.SDL_Keycode.SDLK_a:
             case SDL.SDL_Keycode.SDLK_LEFT:
-                if (snake.Head.currentDirection != SnakePiece.Direction.RIGHT && snake.Head.currentDirection != SnakePiece.Direction.LEFT) { snake.MovementQueue.Add(SnakePiece.Direction.LEFT); }
+                snake.ProcessInput(SnakePiece.Direction.LEFT);
                 break;
+            case SDL.SDL_Keycode.SDLK_d:
             case SDL.SDL_Keycode.SDLK_RIGHT:
-                if (snake.Head.currentDirection != SnakePiece.Direction.LEFT && snake.Head.currentDirection != SnakePiece.Direction.RIGHT) { snake.MovementQueue.Add(SnakePiece.Direction.RIGHT); }
+                snake.ProcessInput(SnakePiece.Direction.RIGHT);
                 break;
 
         }
