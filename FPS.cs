@@ -12,7 +12,7 @@ public class FPSCounter
     public Texture fpsText;
     public int frameCount;
     public IntPtr Renderer;
-    const int targetFPS = 60;
+    const int targetFPS = 120;
     const int frameDelay = 1000 / targetFPS;
 
 
@@ -40,7 +40,7 @@ public class FPSCounter
 
         fpsText.LoadFromText($"FPS: {Get()} ", new SDL.SDL_Color { r = 255, g = 255, b = 255, a = 255 });
         uint frameDuration = SDL.SDL_GetTicks() - frameStartTime;
-        if (frameDelay > frameDuration)
+        if (frameDelay >= frameDuration)
         {
             SDL.SDL_Delay(frameDelay - frameDuration);  // Delay to maintain target FPS
         }

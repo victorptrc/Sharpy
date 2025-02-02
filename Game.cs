@@ -24,7 +24,7 @@ public class Game
 
         snake = new Snake(5 * 40, 5 * 40);
         Running = true;
-        uint lastMovementTime = SDL.SDL_GetTicks();
+        Time.Start();
         fps = new(renderer, font);
         while (Running)
         {
@@ -43,15 +43,10 @@ public class Game
             }
             fps.Update();
             uint currentTime = SDL.SDL_GetTicks();
+            snake.Update();
+            Time.Update();
             RenderObjects();
-            if (currentTime - lastMovementTime >= 135)
-            {
-                Console.WriteLine($"Time since last movement:{currentTime - lastMovementTime}");
-                snake.PrintMovementQueue();
-                Console.WriteLine($"Current Direction: {snake.Head.currentDirection}");
-                snake.Move();
-                lastMovementTime = currentTime;
-            }
+
 
         }
         Clean();

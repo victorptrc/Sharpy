@@ -6,7 +6,7 @@ public class Texture
     private IntPtr Surface;
     private IntPtr Renderer;
     public IntPtr TexturePtr;
-    private string Path;
+    private string Path = string.Empty;
 
     private IntPtr Font;
 
@@ -21,6 +21,7 @@ public class Texture
     {
         Renderer = renderer;
         Font = font;
+        Path = string.Empty;
     }
     public void LoadFromText(string text, SDL.SDL_Color color)
     {
