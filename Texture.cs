@@ -9,6 +9,7 @@ public class Texture
     private string Path = string.Empty;
 
     private IntPtr Font;
+    public enum TexturePart { TopPart, BottomPart, LeftPart, RightPart }
 
     public Texture(IntPtr renderer, string path)
     {
@@ -88,6 +89,41 @@ public class Texture
     {
         SDL.SDL_DestroyTexture(TexturePtr);
         TexturePtr = IntPtr.Zero;
+    }
+
+    public void RenderPart(int x, int y, float part, TexturePart texturePart)
+    {
+
+        // Define source rectangle
+        SDL.SDL_Rect srcRect = new SDL.SDL_Rect { x = 0, y = 0, w = GetWidth(), h = GetHeight() };
+
+        // Adjust source rectangle based on part selection
+        switch (texturePart)
+        {
+            case TexturePart.LeftPart:
+                srcRect.w = (int)(srcRect.w * part);
+                break;
+            case TexturePart.RightPart:
+                srcRect.x = (int)(GetWidth() - GetWidth() * part);
+                srcRect.w = (int)(srcRect.w * part);
+                break;
+            case TexturePart.TopPart:
+                srcRect.h = (int)(srcRect.h * part);
+                break;
+            case TexturePart.BottomPart:
+                srcRect.y = (int)(GetWidth() - GetWidth() * part);
+                srcRect.h = (int)(srcRect.h * part);
+                break;
+            default:
+                return;
+        }
+
+        // Define destination rectangle (keeps the cropped size)
+        SDL.SDL_Rect destRect = new SDL.SDL_Rect { x = x, y = y, w = srcRect.w, h = srcRect.h };
+
+        // Render the cropped texture
+        SDL.SDL_RenderCopy(Renderer, TexturePtr, ref srcRect, ref destRect);
+
     }
 
 

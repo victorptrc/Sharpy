@@ -8,8 +8,10 @@ public class Game
     public IntPtr renderer = IntPtr.Zero; // Rendering context
     public bool Running;
     public Snake snake;
+    public Apple apple;
     public IntPtr font;
     public Background background;
+    private bool Pause = false;
     public static Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
     FPSCounter fps;
 
@@ -23,6 +25,7 @@ public class Game
         LoadMedia();
 
         snake = new Snake(5 * 40, 5 * 40);
+        apple = new Apple();
         Running = true;
         Time.Start();
         fps = new(renderer, font);
@@ -41,10 +44,12 @@ public class Game
                     HandleKeyPress(e);
                 }
             }
-            fps.Update();
-            uint currentTime = SDL.SDL_GetTicks();
-            snake.Update();
-            Time.Update();
+            if (!Pause)
+            {
+                fps.Update();
+                snake.Update();
+                Time.Update();
+            }
             RenderObjects();
 
 
@@ -59,6 +64,10 @@ public class Game
         snake.Render(renderer);
         fps.Display(500, 0);
         SDL.SDL_RenderPresent(renderer);
+    }
+    public void CheckCollisions()
+    {
+
     }
     public void LoadMedia()
     {
@@ -160,6 +169,10 @@ public class Game
             case SDL.SDL_Keycode.SDLK_RIGHT:
                 snake.ProcessInput(SnakePiece.Direction.RIGHT);
                 break;
+            case SDL.SDL_Keycode.SDLK_SPACE:
+                Pause = !Pause;
+                break;
+
 
         }
     }

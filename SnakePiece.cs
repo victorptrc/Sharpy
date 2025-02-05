@@ -10,6 +10,8 @@ public class SnakePiece : GameObject
     public PieceTypes PieceType;
     public Direction currentDirection;
     public Direction lastDirection;
+    public float TileProgress;
+    public float Angle;
     public SnakePiece(Direction direction, PieceTypes type)
     {
         PieceType = type;

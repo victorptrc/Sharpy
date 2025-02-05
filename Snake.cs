@@ -19,12 +19,7 @@ public class Snake
         AddPiece();
         AddPiece();
         AddPiece();
-        AddPiece();
-        AddPiece();
-        AddPiece();
-        AddPiece();
-        AddPiece();
-        AddPiece();
+
 
     }
     public void AddPiece()
@@ -84,29 +79,13 @@ public class Snake
             MovementQueue.RemoveAt(0);
 
         }
-        if (Head.X >= 600)
-        {
-            Head.X = 0;
-        }
-        else if (Head.X < 0)
-        {
-            Head.X = 600;
-        }
-        else if (Head.Y >= 600)
-        {
-            Head.Y = 0;
-        }
-        else if (Head.Y < 0)
-        {
-            Head.Y = 600;
-        }
 
         for (int i = snakePieces.Count - 1; i > 0; i--)
         {
             snakePieces[i].previousX = snakePieces[i].X;
             snakePieces[i].previousY = snakePieces[i].Y;
-            snakePieces[i].targetX = snakePieces[i - 1].X;
-            snakePieces[i].targetY = snakePieces[i - 1].Y;
+            snakePieces[i].X = snakePieces[i - 1].X;
+            snakePieces[i].Y = snakePieces[i - 1].Y;
             snakePieces[i].lastDirection = snakePieces[i].currentDirection;
             snakePieces[i].currentDirection = snakePieces[i - 1].currentDirection;
         }
@@ -114,16 +93,16 @@ public class Snake
         switch (Head.currentDirection)
         {
             case SnakePiece.Direction.UP:
-                Head.targetY -= 40;
+                Head.Y -= 40;
                 break;
             case SnakePiece.Direction.DOWN:
-                Head.targetY += 40;
+                Head.Y += 40;
                 break;
             case SnakePiece.Direction.LEFT:
-                Head.targetX -= 40;
+                Head.X -= 40;
                 break;
             case SnakePiece.Direction.RIGHT:
-                Head.targetX += 40;
+                Head.X += 40;
                 break;
             default:
                 break;
@@ -176,28 +155,12 @@ public class Snake
         if (timeElapsed >= Time.MovementDelay)
         {
 
-            foreach (var piece in snakePieces)
-            {
-                piece.X = piece.targetX;
-                piece.Y = piece.targetY;
-                piece.previousX = piece.X;
-                piece.previousY = piece.Y;
-                piece.ChangeTexture(piece.currentDirection);
-
-            }
             Move();
-
-            Time.ResetMoveTime(); // Update LastMoveTime properly
-        }
-        else
-        {
-            // Smooth movement
-            float factor = timeElapsed / (float)Time.MovementDelay;
             foreach (var piece in snakePieces)
             {
-                piece.X = (int)(piece.previousX + (piece.targetX - piece.previousX) * factor);
-                piece.Y = (int)(piece.previousY + (piece.targetY - piece.previousY) * factor);
+                piece.ChangeTexture(piece.currentDirection);
             }
+            Time.ResetMoveTime(); // Update LastMoveTime properly
         }
     }
 
