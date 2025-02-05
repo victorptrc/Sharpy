@@ -6,7 +6,7 @@ using Sharpy;
 
 public class Snake
 {
-    private List<SnakePiece> snakePieces = new List<SnakePiece>();
+    public List<SnakePiece> snakePieces = new List<SnakePiece>();
     public SnakePiece Head;
     public List<SnakePiece.Direction> MovementQueue = new();
     public int timeSinceLastMove;
@@ -15,11 +15,6 @@ public class Snake
     {
         Head = new(startX, startY, SnakePiece.Direction.RIGHT, SnakePiece.PieceTypes.Head);
         snakePieces.Add(Head);
-        AddPiece();
-        AddPiece();
-        AddPiece();
-        AddPiece();
-        AddPiece();
         AddPiece();
         AddPiece();
         AddPiece();
@@ -55,6 +50,11 @@ public class Snake
                 newX = lastPiece.X + 40;
                 newY = lastPiece.Y;
                 break;
+        }
+        if (lastPiece.currentDirection != lastPiece.lastDirection)
+        {
+            lastPiece.lastDirection = lastPiece.currentDirection;
+            lastPiece.ChangeTexture(lastPiece.currentDirection);
         }
         SnakePiece newPiece = new(newX, newY, lastPiece.currentDirection, SnakePiece.PieceTypes.Tail);
         snakePieces.Add(newPiece);
@@ -103,10 +103,8 @@ public class Snake
 
         for (int i = snakePieces.Count - 1; i > 0; i--)
         {
-            snakePieces[i].previousX = snakePieces[i].X;
-            snakePieces[i].previousY = snakePieces[i].Y;
-            snakePieces[i].targetX = snakePieces[i - 1].X;
-            snakePieces[i].targetY = snakePieces[i - 1].Y;
+            snakePieces[i].X = snakePieces[i - 1].X;
+            snakePieces[i].Y = snakePieces[i - 1].Y;
             snakePieces[i].lastDirection = snakePieces[i].currentDirection;
             snakePieces[i].currentDirection = snakePieces[i - 1].currentDirection;
         }
@@ -114,23 +112,20 @@ public class Snake
         switch (Head.currentDirection)
         {
             case SnakePiece.Direction.UP:
-                Head.targetY -= 40;
+                Head.Y -= 40;
                 break;
             case SnakePiece.Direction.DOWN:
-                Head.targetY += 40;
+                Head.Y += 40;
                 break;
             case SnakePiece.Direction.LEFT:
-                Head.targetX -= 40;
+                Head.X -= 40;
                 break;
             case SnakePiece.Direction.RIGHT:
-                Head.targetX += 40;
+                Head.X += 40;
                 break;
             default:
                 break;
         }
-        snakePieces[0].ChangeTexture(snakePieces[0].currentDirection);
-
-
     }
     public void Render(IntPtr renderer)
     {
@@ -175,29 +170,16 @@ public class Snake
         uint timeElapsed = Time.CurrentMoveTime - Time.LastMoveTime;
         if (timeElapsed >= Time.MovementDelay)
         {
+            Move();
 
             foreach (var piece in snakePieces)
             {
-                piece.X = piece.targetX;
-                piece.Y = piece.targetY;
-                piece.previousX = piece.X;
-                piece.previousY = piece.Y;
+
                 piece.ChangeTexture(piece.currentDirection);
 
             }
-            Move();
 
             Time.ResetMoveTime(); // Update LastMoveTime properly
-        }
-        else
-        {
-            // Smooth movement
-            float factor = timeElapsed / (float)Time.MovementDelay;
-            foreach (var piece in snakePieces)
-            {
-                piece.X = (int)(piece.previousX + (piece.targetX - piece.previousX) * factor);
-                piece.Y = (int)(piece.previousY + (piece.targetY - piece.previousY) * factor);
-            }
         }
     }
 

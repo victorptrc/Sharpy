@@ -8,10 +8,13 @@ public class Game
     public IntPtr renderer = IntPtr.Zero; // Rendering context
     public bool Running;
     public Snake snake;
+    public Apple apple;
     public IntPtr font;
     public Background background;
     public static Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
-    FPSCounter fps;
+    public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
+    public FPSCounter fps;
+    public bool Pause = false;
 
 
 
@@ -21,7 +24,7 @@ public class Game
 
         Initialize();
         LoadMedia();
-
+        apple = new Apple();
         snake = new Snake(5 * 40, 5 * 40);
         Running = true;
         Time.Start();
@@ -41,13 +44,15 @@ public class Game
                     HandleKeyPress(e);
                 }
             }
-            fps.Update();
-            uint currentTime = SDL.SDL_GetTicks();
-            snake.Update();
-            Time.Update();
+            if (!Pause)
+            {
+                fps.Update();
+                CheckCollision();
+
+                snake.Update();
+                Time.Update();
+            }
             RenderObjects();
-
-
         }
         Clean();
 
@@ -57,6 +62,7 @@ public class Game
         SDL.SDL_RenderClear(renderer);
         background.Draw();
         snake.Render(renderer);
+        apple.Render(renderer);
         fps.Display(500, 0);
         SDL.SDL_RenderPresent(renderer);
     }
@@ -102,6 +108,13 @@ public class Game
                 return;
             }
         }
+
+        // Load Sounds
+        Sounds["beep1"] = new Sound("./sounds/beep1.wav");
+        Sounds["beep2"] = new Sound("./sounds/beep1.wav");
+        Sounds["eat"] = new Sound("./sounds/eat.wav");
+        Sounds["dead"] = new Sound("./sounds/dead.wav");
+
     }
     public void Initialize()
     {
@@ -121,6 +134,18 @@ public class Game
         if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG) < 0)
         {
             Console.WriteLine($"SDL Image could not initialize! SDL_Error: {SDL.SDL_GetError()}");
+        }
+        // Initialize Audio
+        if (SDL.SDL_Init(SDL.SDL_INIT_AUDIO) < 0)
+        {
+            Console.WriteLine("SDL audio could not initialize! Error: " + SDL.SDL_GetError());
+            return;
+        }
+        //Initialize Mixer
+        if (SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+        {
+            Console.WriteLine("SDL_mixer could not initialize! Error: " + SDL.SDL_GetError());
+            return;
         }
 
         //Create Window
@@ -160,15 +185,42 @@ public class Game
             case SDL.SDL_Keycode.SDLK_RIGHT:
                 snake.ProcessInput(SnakePiece.Direction.RIGHT);
                 break;
+            case SDL.SDL_Keycode.SDLK_SPACE:
+                Pause = !Pause;
+                break;
+
 
         }
     }
+    public void CheckCollision()
+    {
+        for (int i = 1; i < snake.snakePieces.Count; i++)
+        {
+            var piece = snake.snakePieces[i];
+            if (piece.X == snake.Head.X && piece.Y == snake.Head.Y)
+            {
+                Pause = true;
+                Sounds["dead"].Play();
+            }
+        }
+        if (snake.Head.X == apple.X && snake.Head.Y == apple.Y)
+        {
+            snake.AddPiece();
+            apple.Regenerate();
+            Sounds["eat"].Play();
+        }
+    }
+
 
     public void Clean()
     {
         foreach (var texture in Textures)
         {
             texture.Value.Destroy();
+        }
+        foreach (var sound in Sounds)
+        {
+            sound.Value.Destroy();
         }
         background.DestroyTexture();
         SDL_ttf.TTF_CloseFont(font);

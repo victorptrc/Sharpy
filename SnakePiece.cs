@@ -3,10 +3,6 @@ public class SnakePiece : GameObject
 {
     public enum Direction { UP, DOWN, LEFT, RIGHT }
     public enum PieceTypes { Head, Body, Tail }
-    public int targetX;
-    public int targetY;
-    public int previousX;
-    public int previousY;
     public PieceTypes PieceType;
     public Direction currentDirection;
     public Direction lastDirection;

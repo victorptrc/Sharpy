@@ -8,7 +8,7 @@ public static class Time
     public static uint LastMoveTime { get; private set; }
     public static uint CurrentMoveTime { get; private set; }
 
-    public static uint MovementDelay { get; } = 1200;
+    public static uint MovementDelay { get; } = 135;
 
 
     public static void Start()
