@@ -18,8 +18,6 @@ public class Snake
         AddPiece();
         AddPiece();
         AddPiece();
-        AddPiece();
-        AddPiece();
 
     }
     public void AddPiece()
@@ -84,22 +82,7 @@ public class Snake
             MovementQueue.RemoveAt(0);
 
         }
-        if (Head.X >= 600)
-        {
-            Head.X = 0;
-        }
-        else if (Head.X < 0)
-        {
-            Head.X = 600;
-        }
-        else if (Head.Y >= 600)
-        {
-            Head.Y = 0;
-        }
-        else if (Head.Y < 0)
-        {
-            Head.Y = 600;
-        }
+
 
         for (int i = snakePieces.Count - 1; i > 0; i--)
         {

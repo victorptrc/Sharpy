@@ -35,7 +35,7 @@ public class Texture
         {
             throw new Exception("SDL_ttf not initialized.");
         }
-        Surface = SDL_ttf.TTF_RenderText_Solid(Font, text, color);
+        Surface = SDL_ttf.TTF_RenderText_Blended(Font, text, color);
         if (Surface == IntPtr.Zero)
         {
             Console.WriteLine("Failed to load texture: " + SDL_image.IMG_GetError());
@@ -83,7 +83,6 @@ public class Texture
         SDL.SDL_Rect dstRect = new SDL.SDL_Rect { x = x, y = y, w = GetWidth(), h = GetHeight() };
         SDL.SDL_RenderCopy(Renderer, TexturePtr, IntPtr.Zero, ref dstRect);
     }
-
     public void Destroy()
     {
         SDL.SDL_DestroyTexture(TexturePtr);

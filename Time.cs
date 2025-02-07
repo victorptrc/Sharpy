@@ -7,7 +7,6 @@ public static class Time
     public static uint TimeSinceLastFrame { get; private set; }
     public static uint LastMoveTime { get; private set; }
     public static uint CurrentMoveTime { get; private set; }
-
     public static uint MovementDelay { get; } = 135;
 
 

@@ -1,5 +1,6 @@
 using SDL2;
 using System;
+using System.Reflection;
 namespace Sharpy;
 
 public class Game
@@ -15,6 +16,9 @@ public class Game
     public static Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
     public FPSCounter fps;
     public bool Pause = false;
+    public int Score = 0;
+    public int HighScore = 0;
+    public UI UI;
 
 
 
@@ -24,8 +28,9 @@ public class Game
 
         Initialize();
         LoadMedia();
-        apple = new Apple();
-        snake = new Snake(5 * 40, 5 * 40);
+        snake = new Snake(20 + 5 * 40, 80 + 5 * 40);
+        apple = new Apple(snake);
+        UI = new UI(font, renderer);
         Running = true;
         Time.Start();
         fps = new(renderer, font);
@@ -44,12 +49,18 @@ public class Game
                     HandleKeyPress(e);
                 }
             }
+            int mouseX, mouseY;
+            SDL.SDL_GetMouseState(out mouseX, out mouseY);
+
+            // Print mouse position
+            Console.WriteLine($"Mouse Position: X = {mouseX}, Y = {mouseY}");
+
             if (!Pause)
             {
                 fps.Update();
-                CheckCollision();
-
                 snake.Update();
+                CheckCollision();
+                UI.Update(Score, HighScore);
                 Time.Update();
             }
             RenderObjects();
@@ -59,17 +70,19 @@ public class Game
     }
     public void RenderObjects()
     {
+        // Set background color
+        SDL.SDL_SetRenderDrawColor(renderer, 86, 138, 52, 255);
         SDL.SDL_RenderClear(renderer);
         background.Draw();
+        UI.Render();
         snake.Render(renderer);
         apple.Render(renderer);
-        fps.Display(500, 0);
         SDL.SDL_RenderPresent(renderer);
     }
     public void LoadMedia()
     {
         //Load font
-        font = SDL_ttf.TTF_OpenFont("./fonts/MegamaxJonathanToo-YqOq2.ttf", 14);
+        font = SDL_ttf.TTF_OpenFont("./fonts/Product Sans Regular.ttf", 20);
         if (font == IntPtr.Zero)
         {
             Console.WriteLine("Failed to load font: " + SDL_ttf.TTF_GetError());
@@ -98,6 +111,9 @@ public class Game
 
         // Load texture for apple
         Textures["apple"] = new Texture(renderer, "./images/apple.png");
+        Textures["trophy"] = new Texture(renderer, "./images/trophy.png");
+        Textures["volume_on"] = new Texture(renderer, "./images/volume_on.png");
+        Textures["volume_off"] = new Texture(renderer, "./images/volume_off.png");
 
         // Check for failed loads
         foreach (var texture in Textures)
@@ -149,7 +165,7 @@ public class Game
         }
 
         //Create Window
-        window = SDL.SDL_CreateWindow("Sharpy", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, 600, 600, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+        window = SDL.SDL_CreateWindow("Sharpy", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, 640, 700, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
         if (window == IntPtr.Zero)
         {
             Console.WriteLine($"Window could not be created! SDL_Error: {SDL.SDL_GetError()}");
@@ -158,7 +174,7 @@ public class Game
         }
 
         //Create renderer
-        renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+        renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
 
         //Create background
         background = new Background(renderer);
@@ -188,8 +204,9 @@ public class Game
             case SDL.SDL_Keycode.SDLK_SPACE:
                 Pause = !Pause;
                 break;
-
-
+            case SDL.SDL_Keycode.SDLK_r:
+                Restart();
+                break;
         }
     }
     public void CheckCollision()
@@ -199,15 +216,44 @@ public class Game
             var piece = snake.snakePieces[i];
             if (piece.X == snake.Head.X && piece.Y == snake.Head.Y)
             {
-                Pause = true;
                 Sounds["dead"].Play();
+                Pause = true;
             }
         }
         if (snake.Head.X == apple.X && snake.Head.Y == apple.Y)
         {
             snake.AddPiece();
             apple.Regenerate();
+            Score += 1;
+            if (Score > HighScore)
+            {
+                HighScore = Score;
+            }
             Sounds["eat"].Play();
+        }
+        if (snake.Head.X < 20)
+        {
+            Sounds["dead"].Play();
+            Pause = true;
+            snake.Head.X = 20;
+        }
+        else if (snake.Head.X >= 620)
+        {
+            Sounds["dead"].Play();
+            Pause = true;
+            snake.Head.X = 580;
+        }
+        else if (snake.Head.Y < 80)
+        {
+            Sounds["dead"].Play();
+            Pause = true;
+            snake.Head.Y = 80;
+        }
+        else if (snake.Head.Y >= 680)
+        {
+            Sounds["dead"].Play();
+            Pause = true;
+            snake.Head.Y = 640;
         }
     }
 
@@ -227,6 +273,24 @@ public class Game
         SDL.SDL_DestroyRenderer(renderer);
         SDL.SDL_DestroyWindow(window);
         SDL.SDL_Quit();
+    }
+    public void Restart()
+    {
+        // Reset the snake
+        snake = new Snake(20 + 5 * 40, 80 + 5 * 40);
+
+        // Reset the apple
+        apple = new Apple(snake);
+
+        // Reset the score
+        Score = 0;
+
+        // Reset the UI
+        UI.Update(Score, HighScore);
+
+        // Reset the game state
+        Pause = true;
+        Running = true;
     }
 
 

@@ -3,12 +3,12 @@ public class Apple : GameObject
 {
     public int SquareX;
     public int SquareY;
+    private Snake snakeRef;
 
-    public Apple()
+    public Apple(Snake snake)
     {
-        Random random = new Random();
-        X = random.Next(0, 15) * 40;
-        Y = random.Next(0, 15) * 40;
+        snakeRef = snake;
+        Regenerate();
         Texture = Game.Textures["apple"];
     }
 
@@ -19,7 +19,15 @@ public class Apple : GameObject
     public void Regenerate()
     {
         Random random = new Random();
-        X = random.Next(0, 15) * 40;
-        Y = random.Next(0, 15) * 40;
+        X = 20 + random.Next(0, 15) * 40;
+        Y = 80 + random.Next(0, 15) * 40;
+        foreach (var piece in snakeRef.snakePieces)
+        {
+            if (piece.X == X && piece.Y == Y)
+            {
+                Regenerate();
+            }
+
+        }
     }
 }
